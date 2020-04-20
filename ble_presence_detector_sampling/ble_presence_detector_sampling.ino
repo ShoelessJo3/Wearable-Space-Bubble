@@ -14,15 +14,15 @@
 int freq = 2000;
 int channel = 0;
 int resolution = 8;
-const int NUM_SAMPLES = 5;
-int samp[NUM_SAMPLES] = {-100,-100,-100,-100,-100};
-int refreshSamp[NUM_SAMPLES] = {-100,-100,-100,-100,-100};
+const int NUM_SAMPLES = 4;
+int samp[NUM_SAMPLES] = {-100,-100,-100,-100};
+int refreshSamp[NUM_SAMPLES] = {-100,-100,-100,-100};
 TaskHandle_t Task1;
 const uint16_t PixelCount = 12; // make sure to set this to the number of pixels in your strip
 const uint8_t PixelPin = 33;  // make sure to set this to the correct pin, ignored for Esp8266
 NeoPixelBrightnessBus<NeoRgbFeature, Neo800KbpsMethod> strip(PixelCount, PixelPin);
 
-int curBrightness = 20;
+int curBrightness = 3;
 int animState = 0;
 int8_t fadeDir = 0;
 int red = 0;
@@ -121,7 +121,7 @@ void loop() {
   }
   
   pBLEScan->clearResults();   // delete results fromBLEScan buffer to release memory
-  delay(20);
+
 
 
     
@@ -133,16 +133,13 @@ void loop() {
 
 
     Serial.println("sampling period beginning for device " + closestAddr);
-    
+    strip.SetBrightness(curBrightness);
     int s = 0;
     for(int i = 0; i < PixelCount; i++)
     {
       strip.SetPixelColor(i, (0,0,0));
-     }
-    for(int i = 0; i<NUM_SAMPLES;i++)
-    {
-      samp_avg+=samp[i]; 
-    }//get avg of samples
+    }
+
     int watchdog_timer = millis();
     while(s < NUM_SAMPLES && millis() - watchdog_timer < 10000) //max this loop can run for is 10 seconds
     {
@@ -231,6 +228,7 @@ void loop() {
     }
     else
     { //the device is in the "danger zone" but not a threat
+      strip.SetBrightness(curBrightness);
       Serial.println("Closest Device: " + closestAddr + " rssi: " + samp_avg);
       for(int i = 0; i < PixelCount; i++)
       { 
@@ -243,7 +241,8 @@ void loop() {
       {
          strip.SetPixelColor(i, warn_color);       
       }//print output warning for users
-      
+      strip.Show();
+      delay(5000);
     }
 
     
